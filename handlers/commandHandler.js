@@ -1,5 +1,6 @@
 import { getCurrentLocationMsg } from '../shared/messages.js';
 import path from 'path';
+import child_process from 'child_process';
 
 import { nwd } from './nwd.js';
 // import { fileOperations } from './fileOperations.js';
@@ -12,6 +13,8 @@ export const commandHandler = async (
 ) => {
   const writeLocationMsg = () => readLine.write(getCurrentLocationMsg());
 
+  input = input.replace(/\s+/g, ' ').trim();
+
   switch (true) {
     case input === '.exit': {
       readLine.emit('SIGINT');
@@ -19,7 +22,6 @@ export const commandHandler = async (
     }
 
     case input === 'gcl': {
-      const child_process = await import('child_process');
       const cp = child_process.fork(path.join(dirname, '/handlers/gcl.js'));
 
       cp.on('exit', () => {
@@ -52,7 +54,7 @@ export const commandHandler = async (
 
     case input.startsWith('cat '): {
       const argsStr = input.slice(4);
-      const child_process = await import('child_process');
+
       const cp = child_process.fork(
         path.join(dirname, '/handlers/fileOperations.js'),
         ['cat', argsStr]
@@ -77,7 +79,6 @@ export const commandHandler = async (
     case input.startsWith('add '): {
       const fileName = input.slice(4);
 
-      const child_process = await import('child_process');
       const cp = child_process.fork(
         path.join(dirname, '/handlers/fileOperations.js'),
         ['add', fileName]
@@ -94,7 +95,6 @@ export const commandHandler = async (
     case input.startsWith('rn '): {
       const argsStr = input.slice(3);
 
-      const child_process = await import('child_process');
       const cp = child_process.fork(
         path.join(dirname, '/handlers/fileOperations.js'),
         ['rn', argsStr]
@@ -111,7 +111,6 @@ export const commandHandler = async (
     case input.startsWith('cp '): {
       const argsStr = input.slice(3);
 
-      const child_process = await import('child_process');
       const cp = child_process.fork(
         path.join(dirname, '/handlers/fileOperations.js'),
         ['cp', argsStr]
@@ -128,7 +127,6 @@ export const commandHandler = async (
     case input.startsWith('mv '): {
       const argsStr = input.slice(3);
 
-      const child_process = await import('child_process');
       const cp = child_process.fork(
         path.join(dirname, '/handlers/fileOperations.js'),
         ['mv', argsStr]
@@ -145,11 +143,26 @@ export const commandHandler = async (
     case input.startsWith('rm '): {
       const argsStr = input.slice(3);
 
-      const child_process = await import('child_process');
       const cp = child_process.fork(
         path.join(dirname, '/handlers/fileOperations.js'),
         ['rm', argsStr]
       );
+
+      cp.on('exit', () => {
+        writeLocationMsg();
+        askForCommand();
+      });
+
+      break;
+    }
+
+    case input.startsWith('os '): {
+      const arg = input.slice(3);
+
+      const cp = child_process.fork(path.join(dirname, '/handlers/os.js'), [
+        'os',
+        arg,
+      ]);
 
       cp.on('exit', () => {
         writeLocationMsg();
