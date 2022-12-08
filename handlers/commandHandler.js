@@ -65,14 +65,6 @@ export const commandHandler = async (
         askForCommand();
       });
 
-      //   fileOperations(
-      //     'cat',
-      //     writeLocationMsg,
-      //     askForCommand,
-      //     readLine,
-      //     pathToFile
-      //   );
-
       break;
     }
 
@@ -177,6 +169,38 @@ export const commandHandler = async (
 
       const cp = child_process.fork(path.join(dirname, '/handlers/hash.js'), [
         'hash',
+        argsStr,
+      ]);
+
+      cp.on('exit', () => {
+        writeLocationMsg();
+        askForCommand();
+      });
+
+      break;
+    }
+
+    case input.startsWith('compress '): {
+      const argsStr = input.slice(9);
+
+      const cp = child_process.fork(path.join(dirname, '/handlers/zlib.js'), [
+        'compress',
+        argsStr,
+      ]);
+
+      cp.on('exit', () => {
+        writeLocationMsg();
+        askForCommand();
+      });
+
+      break;
+    }
+
+    case input.startsWith('decompress '): {
+      const argsStr = input.slice(11);
+
+      const cp = child_process.fork(path.join(dirname, '/handlers/zlib.js'), [
+        'decompress',
         argsStr,
       ]);
 

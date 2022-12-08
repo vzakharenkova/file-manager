@@ -24,6 +24,5 @@ export const resolveTwoArgs = (argsStr) => {
 
   //     }
   // }
-
   return [path_1, path_2];
 };
