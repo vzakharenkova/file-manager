@@ -172,6 +172,22 @@ export const commandHandler = async (
       break;
     }
 
+    case input.startsWith('hash '): {
+      const argsStr = input.slice(5);
+
+      const cp = child_process.fork(path.join(dirname, '/handlers/hash.js'), [
+        'hash',
+        argsStr,
+      ]);
+
+      cp.on('exit', () => {
+        writeLocationMsg();
+        askForCommand();
+      });
+
+      break;
+    }
+
     default: {
       readLine.write(`\r\nUnknown command: ${input}\r\n`);
 
