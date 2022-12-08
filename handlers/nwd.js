@@ -1,6 +1,5 @@
-import { homedir } from 'os';
 import { readdir, stat } from 'node:fs/promises';
-import { dirNotExistMsg, changeDirErrMsg } from '../shared/messages.js';
+import { dirNotExistMsg } from '../shared/messages.js';
 
 export const nwd = async (
   command,
@@ -11,24 +10,16 @@ export const nwd = async (
 ) => {
   switch (command) {
     case 'up': {
-      if (process.cwd() === homedir()) {
-        process.stdout.write(changeDirErrMsg);
-      } else {
-        process.chdir('../');
-      }
+      process.chdir('../');
 
       break;
     }
 
     case 'cd': {
-      if (newDir.startsWith(homedir())) {
-        try {
-          process.chdir(newDir);
-        } catch (err) {
-          readLine.write(dirNotExistMsg);
-        }
-      } else {
-        readLine.write(changeDirErrMsg);
+      try {
+        process.chdir(newDir);
+      } catch (err) {
+        readLine.write(dirNotExistMsg);
       }
 
       break;
