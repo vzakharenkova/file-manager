@@ -1,44 +1,45 @@
-import { readdir, stat } from 'node:fs/promises';
-import { dirNotExistMsg } from '../shared/messages.js';
+import { readdir } from 'node:fs/promises';
+import { homedir } from 'node:os';
+import path from 'node:path';
+import { COMMANDS, createErrorMsg, red } from '../shared/utils.js';
 
-export const nwd = async (
-  command,
-  writeLocationMsg,
-  askForCommand,
-  readLine,
-  newDir
-) => {
+export const nwd = async (command, askForCommand, newDir) => {
   switch (command) {
-    case 'up': {
-      process.chdir('../');
-
-      break;
-    }
-
-    case 'cd': {
+    case COMMANDS.GO_UPPER.command: {
       try {
-        process.chdir(newDir);
-      } catch (err) {
-        readLine.write(dirNotExistMsg);
+        process.chdir('../');
+      } catch (error) {
+        console.log(createErrorMsg(error));
       }
 
       break;
     }
 
-    case 'ls': {
+    case COMMANDS.CHANGE_DIRECTORY.command: {
+      if (newDir.startsWith(path.parse(homedir()).root)) {
+        try {
+          process.chdir(newDir);
+        } catch (error) {
+          error.message.includes('ENOENT')
+            ? console.log(createErrorMsg(new Error(`${newDir} is not found.`)))
+            : console.log(createErrorMsg(error));
+        }
+      }
+
+      break;
+    }
+
+    case COMMANDS.LIST_CONTENT.command: {
       try {
-        const content = await readdir(process.cwd()).then((items) =>
-          Promise.all(
-            items.map(
-              async (item) =>
-                await stat(item).then((data) => {
-                  return {
-                    Name: item,
-                    Type: data.isDirectory() ? 'directory' : 'file',
-                  };
-                })
-            )
-          )
+        const content = await readdir(process.cwd(), {
+          withFileTypes: true,
+        }).then((items) =>
+          items.map((item) => {
+            return {
+              Name: item.name,
+              Type: item.isDirectory() ? 'directory' : 'file',
+            };
+          })
         );
 
         console.table(
@@ -50,13 +51,16 @@ export const nwd = async (
           })
         );
       } catch (error) {
-        console.error(error);
+        console.log(createErrorMsg(error));
       }
 
       break;
     }
+
+    default: {
+      console.log(red('Smth went wrong. Please, try again.'));
+    }
   }
 
-  writeLocationMsg();
   askForCommand();
 };

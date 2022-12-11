@@ -1,47 +1,49 @@
 import os from 'os';
+import { createInputErrorMsg, green, OS_ARGS } from '../shared/utils.js';
 
 const arg = process.argv[3];
 
-switch (true) {
-  case arg.startsWith('--EOL ') || arg === '--EOL': {
-    process.stdout.write(`system End-Of-Line: ${JSON.stringify(os.EOL)}\r\n`);
+switch (arg) {
+  case OS_ARGS.EOL: {
+    console.log(green(`system End-Of-Line: ${JSON.stringify(os.EOL)}`));
 
     break;
   }
 
-  case arg.startsWith('--cpus ') || arg === '--cpus': {
+  case OS_ARGS.CPUS: {
     const CPUsInfo = os.cpus();
 
-    process.stdout.write(`Amount of CPUS: ${CPUsInfo.length}\r\n`);
+    console.log(green(`Amount of CPUS: ${CPUsInfo.length}`));
 
     CPUsInfo.forEach((cpu) =>
-      process.stdout.write(
-        `Model: ${cpu.model}, clock rate: ${cpu.speed / 1000}GHz\r\n`
+      console.log(
+        green(`Model: ${cpu.model}, clock rate: ${cpu.speed / 1000}GHz`)
       )
     );
 
     break;
   }
 
-  case arg.startsWith('--homedir ') || arg === '--homedir': {
-    process.stdout.write(`Home directory: ${os.homedir()}\r\n`);
+  case OS_ARGS.HOMEDIR: {
+    console.log(green(`Home directory: ${os.homedir()}`));
 
     break;
   }
 
-  case arg.startsWith('--username ') || arg === '--username': {
-    process.stdout.write(`Username: ${os.userInfo().username}\r\n`);
+  case OS_ARGS.USERNAME: {
+    console.log(green(`Username: ${os.userInfo().username}`));
 
     break;
   }
 
-  case arg.startsWith('--architecture ') || arg === '--architecture': {
-    process.stdout.write(`CPU architecture: ${os.arch()}\r\n`);
+  case OS_ARGS.ARCHITECTURE: {
+    console.log(green(`CPU architecture: ${os.arch()}\r\n`));
 
     break;
   }
 
   default: {
-    process.stdout.write('Unknown argument.\r\n');
+    const error = new Error(`unknown argument '${arg}'`);
+    console.log(createInputErrorMsg(error));
   }
 }
