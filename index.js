@@ -37,9 +37,7 @@ const initFileManager = async () => {
 
   const askForCommand = () => {
     rl.question(
-      yellow(
-        `\r\n${getCurrentLocationMsg()}Enter a command.\r\nTo get the list of available commands enter "cl".\r\n\r\n`
-      ),
+      yellow(`\r\n${getCurrentLocationMsg()}Enter a command.\r\n\r\n`),
       (input) => commandHandler(rl, input, __dirname, askForCommand)
     );
   };

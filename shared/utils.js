@@ -3,30 +3,100 @@ import path from 'path';
 import child_process from 'child_process';
 import { stat } from 'fs/promises';
 
-export const COMMANDS = {
-  EXIT: { command: '.exit', arguments: '' },
-  COMMANDS_LIST: { command: 'cl', arguments: '' },
-  GO_UPPER: { command: 'up', arguments: '' },
-  CHANGE_DIRECTORY: { command: 'cd', arguments: '' },
-  LIST_CONTENT: { command: 'ls', arguments: '' },
-  READ_FILE: { command: 'cat', arguments: '' },
-  ADD_FILE: { command: 'add', arguments: '' },
-  RENAME_FILE: { command: 'rn', arguments: '' },
-  COPY_FILE: { command: 'cp', arguments: '' },
-  MOVE_FILE: { command: 'mv', arguments: '' },
-  DELETE_FILE: { command: 'rm', arguments: '' },
-  OPERATING_SYSTEM: { command: 'os', arguments: '' },
-  HASH: { command: 'hash', arguments: '' },
-  COMPRESS: { command: 'compress', arguments: '' },
-  DECOMPRESS: { command: 'decompress', arguments: '' },
-};
-
 export const OS_ARGS = {
   EOL: '--EOL',
   CPUS: '--cpus',
   HOMEDIR: '--homedir',
   USERNAME: '--username',
   ARCHITECTURE: '--architecture',
+};
+
+export const COMMANDS = {
+  EXIT: {
+    command: '.exit',
+    arguments: '',
+    description: 'exit from file manager',
+  },
+  COMMANDS_LIST: {
+    command: 'cl',
+    arguments: '',
+    description: 'display list of available commands',
+  },
+  GO_UPPER: {
+    command: 'up',
+    arguments: '',
+    description: 'go upper from current directory',
+  },
+  CHANGE_DIRECTORY: {
+    command: 'cd',
+    arguments: 'path_to_directory',
+    description: 'go to dedicated folder from current directory',
+  },
+  LIST_CONTENT: {
+    command: 'ls',
+    arguments: '',
+    description: 'print list of all files and folders in current directory',
+  },
+  READ_FILE: {
+    command: 'cat',
+    arguments: 'path_to_file',
+    description: "read file and print it's content",
+  },
+  ADD_FILE: {
+    command: 'add',
+    arguments: 'new_file_name',
+    description: 'create empty file in current working directory',
+  },
+  RENAME_FILE: {
+    command: 'rn',
+    arguments: 'path_to_file new_filename',
+    description: 'rename file',
+  },
+  COPY_FILE: {
+    command: 'cppath_to_file path_to_new_directory',
+    arguments: '',
+    description: 'copy file ',
+  },
+  MOVE_FILE: {
+    command: 'mv',
+    arguments: 'path_to_file path_to_new_directory',
+    description: 'move file',
+  },
+  DELETE_FILE: {
+    command: 'rm',
+    arguments: 'path_to_file',
+    description: 'delete file',
+  },
+  OPERATING_SYSTEM: {
+    command: 'os',
+    arguments: [
+      { arg: OS_ARGS.EOL, description: 'get EOL (default system End-Of-Line)' },
+      { arg: OS_ARGS.CPUS, description: 'get host machine CPUs info' },
+      { arg: OS_ARGS.HOMEDIR, description: 'get home directory' },
+      { arg: OS_ARGS.USERNAME, description: 'get current system user name' },
+      {
+        arg: OS_ARGS.ARCHITECTURE,
+        description:
+          'get CPU architecture for which Node.js binary has compiled',
+      },
+    ],
+    description: 'operating system info',
+  },
+  HASH: {
+    command: 'hash',
+    arguments: 'path_to_file',
+    description: 'calculate hash for file',
+  },
+  COMPRESS: {
+    command: 'compress',
+    arguments: 'path_to_file path_to_destination',
+    description: 'compress file (using Brotli algorithm)',
+  },
+  DECOMPRESS: {
+    command: 'decompress',
+    arguments: 'path_to_file path_to_destination',
+    description: 'decompress file (using Brotli algorithm)',
+  },
 };
 
 export const getCurrentLocationMsg = () =>
@@ -74,7 +144,7 @@ export const resolveTwoArgs = (argsStr) => {
   if (!argsStr.includes("'") || !argsStr.includes('"')) {
     const arr = argsStr.split(' ');
     if (arr.length < 2) {
-      process.stdout.write('You should pass 2 args');
+      console.log(red('You should pass 2 args!'));
       process.exit();
     }
     path_1 = path.resolve(arr[0]);

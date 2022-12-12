@@ -13,7 +13,25 @@ import path from 'path';
 
 const command = process.argv[2];
 const argsStr = process.argv[3];
-const [sourceFile, destinationFolder] = resolveTwoArgs(argsStr);
+const [sourceFile, destinationFile] = resolveTwoArgs(argsStr);
+
+const destinationFolder = path.parse(destinationFile).dir;
+
+await access(sourceFile)
+  .then(
+    async () =>
+      await stat(sourceFile)
+        .then((value) => value.isFile())
+        .then((value) => {
+          if (!value) {
+            throw new Error();
+          }
+        })
+  )
+  .catch(() => {
+    console.log(createErrorMsg(new Error(`${sourceFile} is not exist!`)));
+    process.exit();
+  });
 
 await stat(destinationFolder)
   .then((value) => value.isDirectory())
@@ -22,14 +40,17 @@ await stat(destinationFolder)
       throw new Error(`${destinationFolder} is not existing directory!`);
     await executeCommand(command);
   })
-  .catch((error) => console.log(createErrorMsg(error)));
-
-async function executeCommand(command) {
-  const destinationFile = path.resolve(
-    destinationFolder,
-    path.parse(sourceFile).base
+  .catch((error) =>
+    error.message.includes('ENOENT')
+      ? console.log(
+          createErrorMsg(
+            new Error(`${destinationFolder} is not existing directory!`)
+          )
+        )
+      : console.log(createErrorMsg(error))
   );
 
+async function executeCommand(command) {
   let readable;
   let writable;
   let brotli;
@@ -37,45 +58,27 @@ async function executeCommand(command) {
 
   switch (command) {
     case COMMANDS.COMPRESS.command: {
-      await stat(sourceFile)
-        .then((value) => value.isFile())
-        .then((value) => {
-          if (!value) {
-            const error = new Error(`${sourceFile} is not a file!`);
-            console.log(createErrorMsg(error));
-            process.exit();
-          }
-          readable = createReadStream(sourceFile);
-          const destinationFileWithExt = destinationFile + '.br';
-          writable = createWriteStream(destinationFileWithExt, {
-            flags: 'wx',
-          });
-          brotli = createBrotliCompress();
-          successMsg = 'File compressed\r\n';
-        })
-        .catch((error) => {
-          console.log(createErrorMsg(error));
-          process.exit();
-        });
+      if (path.extname(destinationFile) !== '.br') {
+        throw new Error('Destination file must have .br extension!');
+      }
+
+      readable = createReadStream(sourceFile);
+      writable = createWriteStream(destinationFile, { flags: 'wx' });
+      brotli = createBrotliCompress();
+      successMsg = 'File compressed';
 
       break;
     }
 
     case COMMANDS.DECOMPRESS.command: {
-      if (path.extname(sourceFile) === '.br') {
-        let modifiedDestinationFile = destinationFile.replace(/.br$/, '');
-        path.extname(modifiedDestinationFile)
-          ? modifiedDestinationFile
-          : modifiedDestinationFile + '.txt';
-        readable = createReadStream(sourceFile);
-        writable = createWriteStream(modifiedDestinationFile, { flags: 'wx' });
-        brotli = createBrotliDecompress();
-        successMsg = 'File decompressed';
-      } else {
-        const error = new Error('Source file must have .br extension!');
-        console.log(createErrorMsg(error));
-        process.exit();
+      if (path.extname(sourceFile) !== '.br') {
+        throw new Error('Source file must have .br extension!');
       }
+
+      readable = createReadStream(sourceFile);
+      writable = createWriteStream(destinationFile, { flags: 'wx' });
+      brotli = createBrotliDecompress();
+      successMsg = 'File decompressed';
 
       break;
     }
@@ -88,7 +91,11 @@ async function executeCommand(command) {
 
   pipeline(readable, brotli, writable, (error) => {
     if (error) {
-      console.log(createErrorMsg(error));
+      error.message.includes('EEXIST')
+        ? console.log(
+            createErrorMsg(new Error(`${destinationFile} already exists!`))
+          )
+        : console.log(createErrorMsg(error));
       process.exit();
     }
     console.log(green(successMsg));
