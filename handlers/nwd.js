@@ -1,7 +1,12 @@
 import { readdir } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import path from 'node:path';
-import { COMMANDS, createErrorMsg, red } from '../shared/utils.js';
+import {
+  COMMANDS,
+  createErrorMsg,
+  red,
+  resolveOneArg,
+} from '../shared/utils.js';
 
 export const nwd = async (command, askForCommand, newDir) => {
   switch (command) {
@@ -16,6 +21,7 @@ export const nwd = async (command, askForCommand, newDir) => {
     }
 
     case COMMANDS.CHANGE_DIRECTORY.command: {
+      newDir = resolveOneArg(newDir);
       if (newDir.startsWith(path.parse(homedir()).root)) {
         try {
           process.chdir(newDir);

@@ -138,23 +138,22 @@ export function blue(str) {
   return `\x1b[36m${str}\x1b[0m`;
 }
 
+export const resolveOneArg = (argsStr) => {
+  return argsStr.replace(/["']/g, '');
+};
+
 export const resolveTwoArgs = (argsStr) => {
   let path_1;
   let path_2;
-  if (!argsStr.includes("'") || !argsStr.includes('"')) {
-    const arr = argsStr.split(' ');
-    if (arr.length < 2) {
-      console.log(red('You should pass 2 args!'));
-      process.exit();
-    }
-    path_1 = path.resolve(arr[0]);
-    path_2 = path.resolve(arr[1]);
+  let arr = argsStr.match(/\w+|["'](?:\\["']|[^"'])+["']/g);
+  arr = arr.map((item) => resolveOneArg(item));
+  if (arr.length < 2) {
+    console.log(red('You should pass 2 args!'));
+    process.exit();
   }
-  // else {
-  //     if (argsStr.startsWith("'") || argsStr.startsWith('"')) {
+  path_1 = path.resolve(arr[0]);
+  path_2 = path.resolve(arr[1]);
 
-  //     }
-  // }
   return [path_1, path_2];
 };
 
