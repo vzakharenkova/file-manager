@@ -53,8 +53,8 @@ export const COMMANDS = {
     description: 'rename file',
   },
   COPY_FILE: {
-    command: 'cppath_to_file path_to_new_directory',
-    arguments: '',
+    command: 'cp',
+    arguments: 'path_to_file path_to_new_directory',
     description: 'copy file ',
   },
   MOVE_FILE: {
@@ -145,7 +145,8 @@ export const resolveOneArg = (argsStr) => {
 export const resolveTwoArgs = (argsStr) => {
   let path_1;
   let path_2;
-  let arr = argsStr.match(/\w+|["'](?:\\["']|[^"'])+["']/g);
+  const re = new RegExp(/\s+(?=(?:"[^"']*"|[^"'])*$)/);
+  let arr = argsStr.split(re);
   arr = arr.map((item) => resolveOneArg(item));
   if (arr.length < 2) {
     console.log(red('You should pass 2 args!'));

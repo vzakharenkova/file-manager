@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { createReadStream } from 'fs';
 import path from 'path';
-import { createErrorMsg, green, red } from '../shared/utils';
+import { createErrorMsg, green, red } from '../shared/utils.js';
 
 const pathToFile = path.resolve(process.argv[3]);
 const stream = createReadStream(pathToFile);

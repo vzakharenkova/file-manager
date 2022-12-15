@@ -22,14 +22,13 @@ export const nwd = async (command, askForCommand, newDir) => {
 
     case COMMANDS.CHANGE_DIRECTORY.command: {
       newDir = resolveOneArg(newDir);
-      if (newDir.startsWith(path.parse(homedir()).root)) {
-        try {
-          process.chdir(newDir);
-        } catch (error) {
-          error.message.includes('ENOENT')
-            ? console.log(createErrorMsg(new Error(`${newDir} is not found.`)))
-            : console.log(createErrorMsg(error));
-        }
+
+      try {
+        process.chdir(newDir);
+      } catch (error) {
+        error.message.includes('ENOENT')
+          ? console.log(createErrorMsg(new Error(`${newDir} is not found.`)))
+          : console.log(createErrorMsg(error));
       }
 
       break;
